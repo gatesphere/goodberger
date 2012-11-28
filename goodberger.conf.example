@@ -1,19 +1,20 @@
 ;; goodberger conf file
 
 ;; email = your email address
-(setf email "test@example.com")
+(set 'email "test@example.com")
 
 ;; email-size = approximately how many lines, rounded
 ;; up to the nearest paragraph break, for each message
-(setf email-size 100)
+(set 'email-size 100)
 
 ;; the directory to store your downloaded texts in
-(setf bookdir "books")
+(set 'bookdir "books")
 
 ;; your subscription file
 ;; format:
-;; 123 0
+;; 123 0 "A book name"
 ;; where 123 is the gutenberg id of a text, and 0 is the line you want
 ;; to start on.  This file is updated by the script every time it's run,
-;; but to add new subscriptions, just add a new line.
-(setf subscriptions "subscriptions.txt")
+;; but to add new subscriptions, just add a new line. The third parameter
+;; is the name of the book, in quotes, used in the email subject line.
+(set 'subscriptions "subscriptions.txt")
