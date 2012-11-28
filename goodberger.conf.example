@@ -1,0 +1,4 @@
+(setf email "test@example.com")
+(setf email-size 100)
+(setf bookdir "books")
+(setf subscriptions "subscriptions.txt")
