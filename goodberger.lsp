@@ -37,7 +37,7 @@
     ; grab a chunk from the book
     (set 'bookchunk (get-book-chunk (book-file id) place email-size))
     ; send email with bookchunk
-    ;(send-email (list title (bookchunk 1) place (- (bookchunk 0) 1)))
+    (catch (send-email title (bookchunk 1) place (- (bookchunk 0) 1)))
     ; return updated subscription pair
     (set 'retval (list id (bookchunk 0) title))
 retval))
@@ -47,20 +47,24 @@ retval))
   (let ((bs "") (line "") (x 0))
     (set 'filehandle (open bookfile "read"))
     (dotimes (x place) (read-line filehandle))
-    (while (or (< x size) (and (>= x size) (!= line "\n")))
-      (read-line filehandle)
-      (set 'line (string (current-line) "\n"))
-      ;(println x ": " (current-line))
-      (set 'bs (append bs line))
-      (inc x))
+    (while (and 
+      (read-line filehandle) 
+      (or (< x size) (and (>= x size) (!= line "\n"))))
+        (set 'line (string (current-line) "\n"))
+        (set 'bs (append bs line))
+        (inc x))
+    (close filehandle)
 (list (+ place x) bs)))
 
 ; send an email
 (define (send-email (title) (text) (begin-line) (end-line))
-  (let (subject "") (command-line "")
+  (if (>= begin-line end-line) (throw nil))
+  (let ((subject "") (command-line ""))
     (set 'subject (string "From Gutenberger: " title " - lines " begin-line "-" end-line))
-    (set 'command-line (string "echo \"" text "\" > mailx -s \"" subject "\"" email))
-    (exec command-line)))
+    (write-file "mail.tmp" text)
+    (set 'command-line (string "cat mail.tmp | mailx -s \"" subject "\" " email))
+    (exec command-line)
+    (delete-file "mail.tmp")))
 
 ;; app logic
 ; create bookdir if it doesn't exist
@@ -75,8 +79,11 @@ retval))
  
 ; act on each subscription
 (set 'new-subs (map act-on-sub subs))
-(println new-subs)
 
 ; write new subscription data
+(set 'filehandle (open subscriptions "write"))
+(dolist (x new-subs)
+  (write-line filehandle (string (x 0) " " (x 1) " \"" (x 2) "\"")))
+(close filehandle)
 
 (exit)
